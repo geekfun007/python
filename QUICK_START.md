@@ -73,6 +73,9 @@ python examples/03_advanced/blueprints.py
 
 # RESTful API
 python examples/03_advanced/restful_api.py
+
+# ORM + DAL 模式
+python examples/03_advanced/orm_dal_pattern.py
 ```
 
 #### 实战项目 - 博客系统
@@ -183,6 +186,7 @@ pytest --cov=app --cov-report=html tests/
 - **docs/principles.md** - Flask 原理详解
 - **docs/best_practices.md** - 最佳实践
 - **docs/deployment.md** - 部署指南
+- **docs/orm_dal_guide.md** - ORM + DAL 完整指南
 
 ---
 
@@ -212,6 +216,7 @@ pytest --cov=app --cov-report=html tests/
 |------|------|------|
 | blueprints.py | 蓝图和应用模块化 | ⭐⭐⭐⭐ |
 | restful_api.py | RESTful API 设计 | ⭐⭐⭐⭐ |
+| orm_dal_pattern.py | ORM + DAL 数据访问层模式 | ⭐⭐⭐⭐⭐ |
 
 ### 实战项目（projects/）
 

@@ -35,9 +35,10 @@ flask-principles-and-practice/
 │   │   ├── database.py               ✅ SQLAlchemy 数据库集成
 │   │   └── authentication.py         ✅ 用户认证和会话管理
 │   │
-│   └── 03_advanced/                   ✅ 高级示例（2个文件）
+│   └── 03_advanced/                   ✅ 高级示例（3个文件）
 │       ├── blueprints.py             ✅ 蓝图和模块化
-│       └── restful_api.py            ✅ RESTful API 设计
+│       ├── restful_api.py            ✅ RESTful API 设计
+│       └── orm_dal_pattern.py        ✅ ORM + DAL 数据访问层模式
 │
 └── projects/                          ✅ 实战项目
     ├── blog/                          ✅ 博客系统
@@ -50,17 +51,17 @@ flask-principles-and-practice/
 ## 📊 统计信息
 
 ### 文件统计
-- **总文件数**: 18 个文件
-- **Python 代码**: 11 个文件
-- **文档文件**: 7 个 Markdown 文件
-- **代码行数**: 约 5,000+ 行（含注释）
+- **总文件数**: 20 个文件
+- **Python 代码**: 12 个文件
+- **文档文件**: 8 个 Markdown 文件
+- **代码行数**: 约 7,500+ 行（含注释）
 
 ### 内容统计
 - **基础示例**: 5 个完整示例
 - **进阶示例**: 3 个完整示例
-- **高级示例**: 2 个完整示例
+- **高级示例**: 3 个完整示例（新增 ORM + DAL）
 - **实战项目**: 1 个完整博客系统
-- **详细文档**: 3 个专题文档
+- **详细文档**: 4 个专题文档（新增 ORM + DAL 指南）
 
 ---
 
@@ -85,6 +86,9 @@ flask-principles-and-practice/
 ### ✅ Flask 高级特性
 - [x] 蓝图 (Blueprints)
 - [x] RESTful API 设计
+- [x] ORM + DAL 模式（对象关系映射 + 数据访问层）
+- [x] Repository 模式
+- [x] Service 层设计
 - [x] 应用工厂模式
 - [x] 请求钩子 (Hooks)
 - [x] 上下文管理
@@ -164,6 +168,15 @@ flask-principles-and-practice/
 - 请求-响应循环
 - 蓝图系统实现
 - 扩展机制
+
+### ORM + DAL 指南 (docs/orm_dal_guide.md)
+- ORM 对象关系映射基础
+- DAL 数据访问层模式
+- Repository 仓储模式
+- Service 业务逻辑层
+- 完整三层架构设计
+- 最佳实践和性能优化
+- 单元测试策略
 
 ### 最佳实践 (docs/best_practices.md)
 - 项目结构建议

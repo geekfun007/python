@@ -176,10 +176,7 @@ if __name__ == '__main__':
 
 1. **blueprints.py** - 应用模块化
 2. **restful_api.py** - RESTful API 设计
-3. **middleware.py** - 中间件和请求钩子
-4. **async_views.py** - 异步视图函数
-5. **testing.py** - 单元测试和集成测试
-6. **deployment.py** - 生产环境部署配置
+3. **orm_dal_pattern.py** - ORM + DAL 数据访问层模式
 
 ---
 
@@ -206,6 +203,93 @@ if __name__ == '__main__':
 - ✅ API 文档 (Swagger)
 - ✅ 速率限制
 - ✅ 缓存策略
+
+---
+
+## ORM + DAL 模式 (ORM + Data Access Layer)
+
+### 什么是 ORM + DAL？
+
+**ORM (对象关系映射)** + **DAL (数据访问层)** 是一种现代化的数据访问架构模式，用于将数据访问逻辑与业务逻辑分离。
+
+### 三层架构
+
+```
+┌─────────────────┐
+│  Presentation   │  ← 路由/控制器 (Routes/Controllers)
+│     Layer       │
+└────────┬────────┘
+         │
+┌────────▼────────┐
+│   Business      │  ← 业务逻辑层 (Service Layer)
+│     Logic       │
+└────────┬────────┘
+         │
+┌────────▼────────┐
+│  Data Access    │  ← 数据访问层 (Repository/DAL)
+│     Layer       │
+└────────┬────────┘
+         │
+┌────────▼────────┐
+│   Database      │  ← 数据库 (ORM Models)
+└─────────────────┘
+```
+
+### 核心概念
+
+#### 1. ORM 模型 (Models)
+数据库表的对象映射：
+
+```python
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True)
+    email = db.Column(db.String(120), unique=True)
+```
+
+#### 2. Repository (仓储)
+封装数据访问操作：
+
+```python
+class UserRepository:
+    def get_by_id(self, id: int) -> Optional[User]:
+        return User.query.get(id)
+    
+    def create(self, username: str, email: str) -> User:
+        user = User(username=username, email=email)
+        db.session.add(user)
+        db.session.commit()
+        return user
+```
+
+#### 3. Service (业务逻辑)
+封装业务规则：
+
+```python
+class UserService:
+    def __init__(self):
+        self.repo = UserRepository()
+    
+    def register_user(self, username: str, email: str):
+        # 业务逻辑：验证、创建、发送邮件等
+        user = self.repo.create(username, email)
+        self._send_welcome_email(user)
+        return user
+```
+
+### 优势
+
+1. **职责分离**: 数据访问、业务逻辑、表现层各司其职
+2. **代码复用**: Repository 和 Service 可在多处使用
+3. **易于测试**: 可以 mock 各层进行单元测试
+4. **易于维护**: 数据库变更只需修改 Repository 层
+5. **类型安全**: 使用类型提示提高代码质量
+
+### 示例代码
+
+查看完整示例：`examples/03_advanced/orm_dal_pattern.py`
+
+详细文档：`docs/orm_dal_guide.md`
 
 ---
 
@@ -274,12 +358,20 @@ python app.py
 
 ---
 
+## 📚 详细文档 (Detailed Documentation)
+
+- **Flask 原理详解** (`docs/principles.md`) - WSGI、上下文、路由等核心原理
+- **最佳实践** (`docs/best_practices.md`) - 项目结构、安全性、性能优化
+- **部署指南** (`docs/deployment.md`) - Gunicorn、Nginx、Docker、云平台
+- **ORM + DAL 指南** (`docs/orm_dal_guide.md`) - 数据访问层完整指南
+
 ## 资源链接 (Resources)
 
 - 官方文档: https://flask.palletsprojects.com/
 - 中文文档: https://dormousehole.readthedocs.io/
 - GitHub: https://github.com/pallets/flask
 - 扩展列表: https://flask.palletsprojects.com/extensions/
+- SQLAlchemy 文档: https://docs.sqlalchemy.org/
 
 ---
 
