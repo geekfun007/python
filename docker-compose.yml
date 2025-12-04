@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # MySQL 数据库
+  mysql:
+    image: mysql:8.0
+    container_name: fastapi_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root123}
+      MYSQL_DATABASE: ${DB_NAME:-fastapi_demo}
+      MYSQL_USER: ${DB_USER:-fastapi_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-root123}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      - fastapi_network
+
+  # FastAPI 应用
+  app:
+    build: .
+    container_name: fastapi_app
+    restart: always
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: ${DB_USER:-fastapi_user}
+      DB_PASSWORD: ${DB_PASSWORD:-root123}
+      DB_NAME: ${DB_NAME:-fastapi_demo}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mysql
+    volumes:
+      - .:/app
+    networks:
+      - fastapi_network
+    command: >
+      sh -c "
+        echo 'Waiting for MySQL...' &&
+        sleep 10 &&
+        python init_db.py &&
+        uvicorn main:app --host 0.0.0.0 --port 8000
+      "
+
+volumes:
+  mysql_data:
+
+networks:
+  fastapi_network:
+    driver: bridge
