@@ -33,6 +33,10 @@
 - `16_http_server.py` - HTTP 服务器
 - `17_fastapi_demo/` - FastAPI 实战项目
 
+### 7. 高级主题
+- `18_types_typing.py` - 类型系统与类型注解
+- `19_cli_tools.py` - CLI 工具（uv、pip、poetry 等）
+
 ## 🚀 快速开始
 
 ### 环境要求
@@ -76,6 +80,8 @@ uvicorn main:app --reload
 - ✅ 开发 Web API 应用
 - ✅ 处理文件和网络 IO
 - ✅ 应用正则表达式和错误处理
+- ✅ 使用类型注解编写类型安全的代码
+- ✅ 熟练使用现代 Python 工具链
 
 ## 📝 贡献
 
