@@ -6,16 +6,21 @@ FROM python:3.11-slim as base
 # 设置环境变量
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+    UV_SYSTEM_PYTHON=1 \
+    UV_NO_CACHE=1
 
 # 创建工作目录
 WORKDIR /app
 
-# 安装系统依赖
+# 安装系统依赖和 uv
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
+    curl \
+    && curl -LsSf https://astral.sh/uv/install.sh | sh \
     && rm -rf /var/lib/apt/lists/*
+
+# 添加 uv 到 PATH
+ENV PATH="/root/.local/bin:$PATH"
 
 
 # 构建阶段
@@ -23,7 +28,7 @@ FROM base as builder
 
 # 安装 Python 依赖
 COPY requirements.txt .
-RUN pip install --user -r requirements.txt
+RUN uv pip install --target /root/.local -r requirements.txt
 
 
 # 最终镜像
