@@ -60,13 +60,16 @@ fastapi_project/
 ### 1. 安装依赖
 
 ```bash
-# 创建虚拟环境
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# venv\Scripts\activate   # Windows
+# 安装 uv (如果尚未安装)
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# 安装依赖
-pip install -r requirements.txt
+# 创建虚拟环境
+uv venv
+source .venv/bin/activate  # Linux/Mac
+# .venv\Scripts\activate   # Windows
+
+# 安装依赖 (使用 uv，比 pip 快 10-100 倍)
+uv pip install -r requirements.txt
 ```
 
 ### 2. 配置环境变量
