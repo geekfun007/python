@@ -1,0 +1,129 @@
+# ============================================
+# Docker Compose 开发环境配置
+# 用于本地开发，支持热重载
+# ============================================
+
+version: '3.8'
+
+services:
+  # ==========================================
+  # FastAPI 应用服务（开发模式）
+  # ==========================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fastapi-app-dev
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/fastapi_db
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=dev-secret-key-not-for-production
+      - DEBUG=true
+      - LOG_LEVEL=DEBUG
+      - DB_ECHO=true
+    volumes:
+      - .:/app  # 挂载源代码实现热重载
+      - ./logs:/app/logs
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - fastapi-network
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # ==========================================
+  # PostgreSQL 数据库
+  # ==========================================
+  db:
+    image: postgres:15-alpine
+    container_name: fastapi-db-dev
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=fastapi_db
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - fastapi-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d fastapi_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ==========================================
+  # Redis 缓存
+  # ==========================================
+  redis:
+    image: redis:7-alpine
+    container_name: fastapi-redis-dev
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data_dev:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - fastapi-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  # ==========================================
+  # Adminer - 数据库管理工具
+  # ==========================================
+  adminer:
+    image: adminer
+    container_name: fastapi-adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - fastapi-network
+
+  # ==========================================
+  # Redis Commander - Redis 管理工具
+  # ==========================================
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: fastapi-redis-commander
+    restart: unless-stopped
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - fastapi-network
+
+# ==========================================
+# 网络配置
+# ==========================================
+networks:
+  fastapi-network:
+    driver: bridge
+
+# ==========================================
+# 数据卷配置
+# ==========================================
+volumes:
+  postgres_data_dev:
+    driver: local
+  redis_data_dev:
+    driver: local
