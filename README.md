@@ -45,20 +45,29 @@
 │   │   ├── base.py             # 基础仓库
 │   │   ├── user.py             # 用户仓库
 │   │   └── item.py             # 物品仓库
-│   ├── schemas/                # IDL (Pydantic 模型)
+│   ├── schemas/                # Pydantic 模型 (API Schema)
 │   │   ├── base.py             # 基础 Schema
 │   │   ├── user.py             # 用户 Schema
 │   │   └── item.py             # 物品 Schema
+│   ├── thrift_gen/             # Thrift IDL 加载和转换
+│   │   ├── __init__.py         # 动态加载 Thrift 模块
+│   │   └── converters.py       # 类型转换器
 │   ├── services/               # 业务逻辑层
 │   │   ├── auth.py             # 认证服务
 │   │   ├── user.py             # 用户服务
 │   │   └── item.py             # 物品服务
 │   └── main.py                 # 应用入口
+├── idl/                        # Thrift IDL 定义
+│   ├── common.thrift           # 通用类型定义
+│   ├── user.thrift             # 用户服务 IDL
+│   ├── item.thrift             # 物品服务 IDL
+│   └── README.md               # IDL 文档
 ├── nginx/                      # Nginx 配置
 │   ├── nginx.conf              # 主配置
 │   └── conf.d/                 # 站点配置
 ├── scripts/                    # 脚本
-│   └── init-db.sql             # 数据库初始化
+│   ├── init-db.sql             # 数据库初始化
+│   └── gen_thrift.sh           # Thrift 代码生成脚本
 ├── tests/                      # 测试
 ├── docker-compose.yml          # 生产环境配置
 ├── docker-compose.dev.yml      # 开发环境配置
@@ -78,6 +87,8 @@
 | Redis | 7 | 缓存 |
 | Nginx | Alpine | 反向代理 |
 | Docker | 24+ | 容器化 |
+| Thrift | IDL | 接口定义语言 |
+| thriftpy2 | 0.5.0 | Thrift 动态加载 |
 
 ## 🚀 快速开始
 
@@ -185,6 +196,22 @@ docker-compose down
 └─────────────────────────────────────────┘
 ```
 
+### Thrift IDL 架构
+
+```
+┌─────────────────────────────────────────┐
+│          .thrift IDL 文件               │
+│  (common.thrift, user.thrift, item.thrift)
+├─────────────────────────────────────────┤
+│         thriftpy2 动态加载              │
+├─────────────────────────────────────────┤
+│           类型转换器                    │
+│    (Thrift ↔ Pydantic ↔ ORM)           │
+├─────────────────────────────────────────┤
+│         FastAPI 路由层                  │
+└─────────────────────────────────────────┘
+```
+
 ### 中间件链
 
 ```
@@ -215,12 +242,34 @@ pytest --cov=app --cov-report=html
 
 ### 添加新的 API
 
-1. 在 `app/schemas/` 中定义请求/响应模型
-2. 在 `app/models/` 中定义 ORM 模型（如需要）
-3. 在 `app/repositories/` 中实现数据访问
-4. 在 `app/services/` 中实现业务逻辑
-5. 在 `app/api/v1/` 中定义路由
-6. 在 `app/api/router.py` 中注册路由
+1. 在 `idl/` 中定义 Thrift IDL（可选，用于跨语言）
+2. 在 `app/schemas/` 中定义 Pydantic 请求/响应模型
+3. 在 `app/models/` 中定义 ORM 模型（如需要）
+4. 在 `app/repositories/` 中实现数据访问
+5. 在 `app/services/` 中实现业务逻辑
+6. 在 `app/api/v1/` 中定义路由
+7. 在 `app/api/router.py` 中注册路由
+
+### Thrift IDL 使用
+
+```python
+# 导入 Thrift 类型
+from app.thrift_gen import (
+    UserInfo,
+    ItemInfo,
+    ErrorCode,
+    build_success_response,
+)
+
+# 使用转换器
+from app.thrift_gen.converters import UserConverter, ItemConverter
+
+# ORM -> Thrift
+user_thrift = UserConverter.orm_to_thrift(user_orm)
+
+# Thrift -> Dict
+user_dict = UserConverter.thrift_to_dict(user_thrift)
+```
 
 ### 代码规范
 
